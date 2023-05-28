@@ -101,7 +101,10 @@ const ChatScreen = (props) => {
         xhr.send(null);
       });
 
-      const storageRef = ref(storage, "public/image");
+      const storageRef = ref(
+        storage,
+        `public/message${chat.chatHistory.length + 1}`
+      );
       const uploadTask = uploadBytesResumable(storageRef, blob, metadata);
       uploadTask.on(
         "state_changed",
@@ -346,7 +349,7 @@ const styles = StyleSheet.create({
   },
   imageContent: {
     resizeMode: "contain",
-    width: Dimensions.get('window').width/3,
+    width: Dimensions.get("window").width / 3,
     aspectRatio: 1,
     backgroundColor: "#7799b5",
     resizeMode: "contain",
