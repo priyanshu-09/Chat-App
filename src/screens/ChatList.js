@@ -15,6 +15,7 @@ import { Box } from "../components/Containers/Box";
 import images from "../../assets/images/images";
 import moment from "moment";
 import { useIsFocused } from "@react-navigation/native";
+import icons from "../../assets/icons/icons";
 
 const ChatList = (props) => {
   const [chatHistory, setChatHistory] = useState([]);
@@ -91,7 +92,23 @@ const ChatList = (props) => {
                         .format("DD MMM, h:mm a")}
                     </Text>
                   </View>
-                  <Text style={styles.lastText}>{item.lastMessage.text}</Text>
+                  {item.lastMessage.type === "text" ? (
+                    <Text style={styles.lastText}>{item.lastMessage.text}</Text>
+                  ) : (
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "flex-end",
+                      }}
+                    >
+                      <Image
+                        source={icons.photoIcon}
+                        style={styles.lastTextImage}
+                      />
+                      <Text style={styles.lastText}>Photo</Text>
+                    </View>
+                  )}
                 </View>
               </TouchableOpacity>
             );
@@ -170,6 +187,12 @@ const styles = StyleSheet.create({
   chatContent: {
     fontFamily: "Medium",
     fontSize: 14,
+  },
+  lastTextImage: {
+    height: 15,
+    width: 15,
+    opacity: 0.7,
+    marginRight: 5,
   },
 });
 

@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -11,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { firebase } from "../../firebase";
+import { firebase, storage } from "../../firebase";
 import { useEffect, useRef, useState } from "react";
 import {
   getFirestore,
@@ -24,16 +25,25 @@ import { Box } from "../components/Containers/Box";
 import images from "../../assets/images/images";
 import moment from "moment";
 import icons from "../../assets/icons/icons";
+import * as ImagePicker from "expo-image-picker";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 
 const ChatScreen = (props) => {
   const [chat, setChat] = useState({});
+  const blurhash =
+    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
   const [messageToBeSent, setMessageToBeSent] = useState("");
   useEffect(() => {
     setChat(props?.route?.params?.chat);
   }, []);
 
-  const sendTextMessage = async (messageText) => {
+  const sendMessage = async (messageText, imageLink, type) => {
     const db = getFirestore(firebase);
 
     try {
@@ -46,11 +56,11 @@ const ChatScreen = (props) => {
           `message${chat.chatHistory.length + 1}`
         ),
         {
-          type: "text",
+          type: type,
           sentByYou: true,
           text: messageText,
           timestamp: new Date(),
-          image: "",
+          image: imageLink,
         }
       );
       setMessageToBeSent("");
@@ -62,53 +72,68 @@ const ChatScreen = (props) => {
   };
 
   const sendImageMessage = async () => {
-    // Get image from the device
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      // Handle permission denied
-      return;
-    }
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-    const image = await ImagePicker.launchImageLibraryAsync();
+    console.log(result);
 
-    if (!image.cancelled) {
-      const { uri } = image;
-      const imageName = uri.substring(uri.lastIndexOf("/") + 1);
+    if (!result.canceled) {
+      console.log(result.assets[0].uri);
 
-      // Upload the image to Firebase Storage
-      const storageRef = firebase.storage().ref().child(`images/${imageName}`);
-      const uploadTask = storageRef.putFile(uri);
+      const metadata = {
+        contentType: "image/jpeg",
+      };
 
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function () {
+          reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", result.assets[0].uri, true);
+        xhr.send(null);
+      });
+
+      const storageRef = ref(storage, "public/image");
+      const uploadTask = uploadBytesResumable(storageRef, blob, metadata);
       uploadTask.on(
-        firebase.storage.TaskEvent.STATE_CHANGED,
+        "state_changed",
         (snapshot) => {
-          // Handle upload progress if required
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload progress:", progress);
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
         },
         (error) => {
-          // Handle upload error
-          console.log("Error uploading image:", error);
+          switch (error.code) {
+            case "storage/unauthorized":
+              break;
+            case "storage/canceled":
+              break;
+
+            // ...
+
+            case "storage/unknown":
+              break;
+          }
         },
         () => {
-          // Image uploaded successfully
-          storageRef.getDownloadURL().then((downloadURL) => {
-            // Save the image details in Firestore
-            const messagesRef = firebase.firestore().collection("messages");
-            messagesRef
-              .add({
-                type: "image",
-                imageUrl: downloadURL,
-                senderId: "USER_ID", // Set the sender ID accordingly
-                timestamp: new Date(),
-              })
-              .then(() => {
-                console.log("Image message sent successfully");
-              })
-              .catch((error) => {
-                console.log("Error sending image message:", error);
-              });
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            sendMessage("", downloadURL, "image");
           });
         }
       );
@@ -176,7 +201,17 @@ const ChatScreen = (props) => {
                       alignItems: item.sentByYou ? "flex-end" : "flex-start",
                     }}
                   >
-                    <Text style={styles.content}>{item.text}</Text>
+                    {item.type === "text" ? (
+                      <Text style={styles.content}>{item.text}</Text>
+                    ) : (
+                      <Image
+                        source={{ uri: item.image }}
+                        style={styles.imageContent}
+                        placeholder={blurhash}
+                        contentFit="cover"
+                        transition={1000}
+                      />
+                    )}
                     <Text
                       style={{
                         ...styles.timestamp,
@@ -198,10 +233,12 @@ const ChatScreen = (props) => {
               onChangeText={(e) => setMessageToBeSent(e)}
             />
             {messageToBeSent === "" ? (
-              <Image source={icons.imageIcon} style={styles.inputIcon} />
+              <TouchableOpacity onPress={() => sendImageMessage()}>
+                <Image source={icons.imageIcon} style={styles.inputIcon} />
+              </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={() => sendTextMessage(messageToBeSent)}
+                onPress={() => sendTextMessage(messageToBeSent, "", "text")}
               >
                 <Image source={icons.sendIcon} style={styles.inputIcon} />
               </TouchableOpacity>
@@ -306,6 +343,13 @@ const styles = StyleSheet.create({
   inputIcon: {
     height: 25,
     width: 25,
+  },
+  imageContent: {
+    resizeMode: "contain",
+    width: Dimensions.get('window').width/3,
+    aspectRatio: 1,
+    backgroundColor: "#7799b5",
+    resizeMode: "contain",
   },
 });
 
