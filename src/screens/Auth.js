@@ -6,7 +6,12 @@ import { Box } from "../components/Containers/Box";
 import { Button } from "../components/Buttons/Button";
 import { useEffect, useState } from "react";
 import icons from "../../assets/icons/icons";
-import { signInWithGoogle } from "../../GoogleAuth";
+
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import { EXPO_CLIENT_ID } from "@env";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const ADMIN_USERNAME = "Priyanshu";
 const ADMIN_PASS = "schmooze";
@@ -31,10 +36,38 @@ const Auth = (props) => {
     }
   };
 
-  //   const handleGoogleSignIn = async () => {
-  //     const result = await signInWithGoogle();
-  //     console.log(result);
-  //   };
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    expoClientId: EXPO_CLIENT_ID,
+
+    scopes: ["profile", "email"],
+    ...{ useProxy: true },
+  });
+  const [token, setToken] = useState("");
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      setToken(response.authentication.accessToken);
+      getUserInfo();
+    }
+  }, [response, token]);
+
+  const getUserInfo = async () => {
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const user = await response.json();
+      setUserInfo(user);
+      props.navigation.push("ChatList", { user: user });
+    } catch (error) {
+      // Add your own error handler here
+    }
+  };
 
   return (
     <LinearGradient colors={["#b6edfe", "#9fccff"]} style={styles.gradient}>
@@ -71,7 +104,9 @@ const Auth = (props) => {
         <View style={{ marginBottom: 20 }}>
           <Text style={styles.boxTitle}>Try other login options</Text>
           <Button
-            // onClick={handleGoogleSignIn}
+            onClick={() => {
+              promptAsync();
+            }}
             text={"Sign In with Google"}
             icon={icons.googleIcon}
           />

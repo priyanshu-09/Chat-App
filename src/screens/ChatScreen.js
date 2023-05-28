@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { firebase, storage } from "../../firebase";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   getFirestore,
   collection,
@@ -32,9 +32,12 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { useIsFocused } from "@react-navigation/native";
 
 const ChatScreen = (props) => {
   const [chat, setChat] = useState({});
+  const scrollViewRef = useRef();
+  const isFocused = useIsFocused();
   const blurhash =
     "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
@@ -42,6 +45,10 @@ const ChatScreen = (props) => {
   useEffect(() => {
     setChat(props?.route?.params?.chat);
   }, []);
+
+  useLayoutEffect(() => {
+    scrollViewRef.current.scrollToEnd({ animated: true });
+  }, [props, isFocused]);
 
   const sendMessage = async (messageText, imageLink, type) => {
     const db = getFirestore(firebase);
@@ -166,6 +173,10 @@ const ChatScreen = (props) => {
     setChat(chatObject);
   };
 
+  const handleContentSizeChange = () => {
+    scrollViewRef.current.scrollToEnd({ animated: true });
+  };
+
   return (
     <LinearGradient colors={["#b6edfe", "#9fccff"]} style={styles.gradient}>
       <SafeAreaView style={styles.wrapper}>
@@ -184,10 +195,15 @@ const ChatScreen = (props) => {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
-          <ScrollView style={styles.chatScrollView}>
+          <ScrollView
+            style={styles.chatScrollView}
+            showsVerticalScrollIndicator={false}
+            ref={scrollViewRef}
+            onContentSizeChange={handleContentSizeChange}
+          >
             {chat?.chatHistory?.map((item, index) => {
               return (
-                <View>
+                <View key={index}>
                   {(index === 0 ||
                     moment.unix(item.timestamp).format("DD MMM ") !==
                       moment
@@ -320,6 +336,8 @@ const styles = StyleSheet.create({
   content: {
     fontFamily: "Medium",
     fontSize: 14,
+    maxWidth: Dimensions.get("window").width / 2,
+    marginBottom: 5,
   },
   timestamp: {
     fontSize: 10,
@@ -353,6 +371,8 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     backgroundColor: "#7799b5",
     resizeMode: "contain",
+    borderRadius: 5,
+    margin: 5,
   },
 });
 

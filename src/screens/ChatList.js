@@ -21,6 +21,7 @@ import LottieView from "lottie-react-native";
 
 const ChatList = (props) => {
   const [chatHistory, setChatHistory] = useState([]);
+  const [userInfo, setUserInfo] = useState(undefined);
   const animation = useRef(null);
   const [loading, setLoading] = useState(true);
   const isFocused = useIsFocused();
@@ -57,7 +58,6 @@ const ChatList = (props) => {
           lastMessage: chatHistory[lastMessageIndex],
         };
 
-        console.log(tempArray);
         tempArray.push(chatObject);
       }
 
@@ -66,6 +66,10 @@ const ChatList = (props) => {
     }
     fetchData();
   }, [props, isFocused]);
+
+  useEffect(() => {
+    if (props?.route?.params?.user) setUserInfo(props?.route?.params?.user);
+  }, []);
 
   useEffect(() => {
     const handler = BackHandler.addEventListener(
@@ -85,7 +89,22 @@ const ChatList = (props) => {
   return (
     <LinearGradient colors={["#b6edfe", "#9fccff"]} style={styles.gradient}>
       <SafeAreaView style={styles.wrapper}>
-        <Text style={styles.pageTitle}>Your Chats</Text>
+        <View style={styles.header}>
+          {userInfo && (
+            <View style={styles.headerImageContainer}>
+              <Image
+                placeholder={blurhash}
+                contentFit="cover"
+                transition={1000}
+                style={styles.headerImage}
+                source={{ uri: userInfo.picture }}
+              />
+            </View>
+          )}
+          <Text style={styles.pageTitle}>
+            {userInfo ? `${userInfo.given_name}'s Chats` : "Your Chats"}
+          </Text>
+        </View>
         <Box style={styles.chatHistoryWrapper}>
           {loading && (
             <LottieView
@@ -98,9 +117,10 @@ const ChatList = (props) => {
             />
           )}
           {!loading &&
-            chatHistory.map((item) => {
+            chatHistory.map((item, index) => {
               return (
                 <TouchableOpacity
+                  key={index}
                   onPress={() =>
                     props.navigation.push("ChatScreen", { chat: item })
                   }
@@ -165,12 +185,28 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     display: "flex",
   },
+  header: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerImageContainer: {
+    padding: 1,
+    borderWidth: 2,
+    borderRadius: 15,
+    marginRight: 5,
+  },
+  headerImage: {
+    height: 25,
+    width: 25,
+    borderRadius: 12,
+  },
   pageTitle: {
     color: "black",
     fontFamily: "Bold",
     textAlign: "center",
-    fontSize: 30,
-    letterSpacing: -3,
+    fontSize: 25,
+    letterSpacing: -2.5,
   },
   chatHistoryWrapper: {
     flex: 1,
