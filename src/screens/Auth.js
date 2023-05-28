@@ -1,7 +1,7 @@
 import { SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
-import { TextShadow } from "../components/Text/TextShadow";
+
 import { Box } from "../components/Containers/Box";
 import { Button } from "../components/Buttons/Button";
 import { useState } from "react";
@@ -15,17 +15,18 @@ const Auth = (props) => {
   const [error, setError] = useState(false);
 
   const handleSubmit = () => {
-    if (username === "" || password === "") {
-      setError(true);
-    }
+    props.navigation.navigate("ChatList");
+    // if (username === "" || password === "") {
+    //   setError(true);
+    // }
 
-    if (username === ADMIN_USERNAME && password === ADMIN_PASS) {
-      props.navigation.navigate("ChatList");
-    } else {
-      setError(true);
-      setUsername("");
-      setPassword("");
-    }
+    // if (username === ADMIN_USERNAME && password === ADMIN_PASS) {
+    //   props.navigation.navigate("ChatList");
+    // } else {
+    //   setError(true);
+    //   setUsername("");
+    //   setPassword("");
+    // }
   };
 
   return (
@@ -60,7 +61,7 @@ const Auth = (props) => {
           />
           <Button text={"Login"} onClick={handleSubmit} />
         </Box>
-        <View>
+        <View style={{ marginBottom: 20 }}>
           <Text style={styles.boxTitle}>Try other login options</Text>
           <Button text={"Sign In with Google"} />
         </View>

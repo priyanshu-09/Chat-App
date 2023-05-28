@@ -31,7 +31,7 @@ export const Button = ({ text, icon, onClick }) => {
 
           color: "black",
           fontFamily: "Bold",
-          fontSize: 15,
+          fontSize: 18,
         }}
       >
         {text}

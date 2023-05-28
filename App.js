@@ -14,6 +14,8 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     Bold: require("./assets/fonts/GTMaruBold.ttf"),
     Medium: require("./assets/fonts/GTMaruMedium.ttf"),
+    Light: require("./assets/fonts/GTMaruLight.ttf"),
+    Regular: require("./assets/fonts/GTMaruRegular.ttf"),
   });
 
   const onLayoutRootView = useCallback(async () => {

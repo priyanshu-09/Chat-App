@@ -4,6 +4,7 @@ export const Box = (props) => {
   return (
     <View
       style={{
+        ...props.style,
         backgroundColor: "white",
         borderWidth: 2,
         borderRadius: 15,
