@@ -7,8 +7,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import ChatList from "./src/screens/ChatList";
 import ChatScreen from "./src/screens/ChatScreen";
+import * as WebBrowser from "expo-web-browser";
 
 const Stack = createNativeStackNavigator();
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -33,8 +36,12 @@ export default function App() {
             // animationTypeForReplace: "push",
           }}
         >
-          {/* <Stack.Screen component={Auth} name="Auth" /> */}
-          <Stack.Screen component={ChatList} name="ChatList" />
+          <Stack.Screen component={Auth} name="Auth" />
+          <Stack.Screen
+            options={{ gestureEnabled: false }}
+            component={ChatList}
+            name="ChatList"
+          />
           <Stack.Screen component={ChatScreen} name="ChatScreen" />
         </Stack.Navigator>
       </NavigationContainer>
@@ -46,3 +53,5 @@ export default function App() {
     </>
   );
 }
+
+console.ignoredYellowBox = ["Warning:"];

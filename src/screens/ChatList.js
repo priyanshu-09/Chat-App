@@ -1,4 +1,5 @@
 import {
+  BackHandler,
   Image,
   SafeAreaView,
   StyleSheet,
@@ -65,6 +66,21 @@ const ChatList = (props) => {
     }
     fetchData();
   }, [props, isFocused]);
+
+  useEffect(() => {
+    const handler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackButtonClick
+    );
+    return () => {
+      handler.remove();
+    };
+  }, []);
+
+  const handleBackButtonClick = () => {
+    console.log("Back Button Triggered");
+    return true;
+  };
 
   return (
     <LinearGradient colors={["#b6edfe", "#9fccff"]} style={styles.gradient}>

@@ -4,10 +4,12 @@ import { StatusBar } from "expo-status-bar";
 
 import { Box } from "../components/Containers/Box";
 import { Button } from "../components/Buttons/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import icons from "../../assets/icons/icons";
+import { signInWithGoogle } from "../../GoogleAuth";
 
-const ADMIN_USERNAME = "T";
-const ADMIN_PASS = "t";
+const ADMIN_USERNAME = "Priyanshu";
+const ADMIN_PASS = "schmooze";
 
 const Auth = (props) => {
   const [username, setUsername] = useState("");
@@ -16,18 +18,23 @@ const Auth = (props) => {
 
   const handleSubmit = () => {
     props.navigation.navigate("ChatList");
-    // if (username === "" || password === "") {
-    //   setError(true);
-    // }
+    if (username === "" || password === "") {
+      setError(true);
+    }
 
-    // if (username === ADMIN_USERNAME && password === ADMIN_PASS) {
-    //   props.navigation.navigate("ChatList");
-    // } else {
-    //   setError(true);
-    //   setUsername("");
-    //   setPassword("");
-    // }
+    if (username === ADMIN_USERNAME && password === ADMIN_PASS) {
+      props.navigation.navigate("ChatList");
+    } else {
+      setError(true);
+      setUsername("");
+      setPassword("");
+    }
   };
+
+  //   const handleGoogleSignIn = async () => {
+  //     const result = await signInWithGoogle();
+  //     console.log(result);
+  //   };
 
   return (
     <LinearGradient colors={["#b6edfe", "#9fccff"]} style={styles.gradient}>
@@ -63,7 +70,11 @@ const Auth = (props) => {
         </Box>
         <View style={{ marginBottom: 20 }}>
           <Text style={styles.boxTitle}>Try other login options</Text>
-          <Button text={"Sign In with Google"} />
+          <Button
+            // onClick={handleGoogleSignIn}
+            text={"Sign In with Google"}
+            icon={icons.googleIcon}
+          />
         </View>
       </SafeAreaView>
     </LinearGradient>

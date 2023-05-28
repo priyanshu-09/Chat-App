@@ -241,7 +241,7 @@ const ChatScreen = (props) => {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={() => sendTextMessage(messageToBeSent, "", "text")}
+                onPress={() => sendMessage(messageToBeSent, "", "text")}
               >
                 <Image source={icons.sendIcon} style={styles.inputIcon} />
               </TouchableOpacity>

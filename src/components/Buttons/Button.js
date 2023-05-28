@@ -22,9 +22,16 @@ export const Button = ({ text, icon, onClick }) => {
         shadowRadius: 0,
         display: "flex",
         justifyContent: "center",
+        flexDirection: "row",
+        alignItems: "center",
       }}
     >
-      {icon && <Image source={icon} style={{ height: 20, width: 20 }} />}
+      {icon && (
+        <Image
+          source={icon}
+          style={{ height: 20, width: 20, marginRight: 20 }}
+        />
+      )}
       <Text
         style={{
           textAlign: "center",
