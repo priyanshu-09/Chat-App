@@ -14,9 +14,11 @@ import { getFirestore, collection, getDocs } from "firebase/firestore/lite";
 import { Box } from "../components/Containers/Box";
 import images from "../../assets/images/images";
 import moment from "moment";
+import { useIsFocused } from "@react-navigation/native";
 
 const ChatList = (props) => {
   const [chatHistory, setChatHistory] = useState([]);
+  const isFocused = useIsFocused();
   const blurhash =
     "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
@@ -55,7 +57,7 @@ const ChatList = (props) => {
       setChatHistory(tempArray);
     }
     fetchData();
-  }, []);
+  }, [props, isFocused]);
 
   return (
     <LinearGradient colors={["#b6edfe", "#9fccff"]} style={styles.gradient}>
@@ -66,7 +68,7 @@ const ChatList = (props) => {
             return (
               <TouchableOpacity
                 onPress={() =>
-                  props.navigation.navigate("ChatScreen", { chat: item })
+                  props.navigation.push("ChatScreen", { chat: item })
                 }
                 style={styles.chatItem}
                 key={item.chatroomId}
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
   chatImageContainer: {
     padding: 2,
     borderWidth: 2,
-    borderRadius:22,
+    borderRadius: 22,
 
     marginRight: 10,
   },
