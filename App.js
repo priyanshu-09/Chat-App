@@ -18,12 +18,6 @@ export default function App() {
     Regular: require("./assets/fonts/GTMaruRegular.ttf"),
   });
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
   if (!fontsLoaded) {
     return null;
   }
@@ -39,7 +33,7 @@ export default function App() {
             // animationTypeForReplace: "push",
           }}
         >
-          <Stack.Screen component={Auth} name="Auth" />
+          {/* <Stack.Screen component={Auth} name="Auth" /> */}
           <Stack.Screen component={ChatList} name="ChatList" />
           <Stack.Screen component={ChatScreen} name="ChatScreen" />
         </Stack.Navigator>

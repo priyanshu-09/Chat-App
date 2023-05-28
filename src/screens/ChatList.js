@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -63,7 +64,13 @@ const ChatList = (props) => {
         <Box style={styles.chatHistoryWrapper}>
           {chatHistory.map((item) => {
             return (
-              <View style={styles.chatItem} key={item.chatroomId}>
+              <TouchableOpacity
+                onPress={() =>
+                  props.navigation.navigate("ChatScreen", { chat: item })
+                }
+                style={styles.chatItem}
+                key={item.chatroomId}
+              >
                 <View style={styles.chatImageContainer}>
                   <Image
                     placeholder={blurhash}
@@ -84,7 +91,7 @@ const ChatList = (props) => {
                   </View>
                   <Text style={styles.lastText}>{item.lastMessage.text}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
         </Box>
@@ -126,14 +133,14 @@ const styles = StyleSheet.create({
   chatImageContainer: {
     padding: 2,
     borderWidth: 2,
-    borderRadius: "50%",
+    borderRadius:22,
 
     marginRight: 10,
   },
   chatImage: {
     height: 50,
     width: 50,
-    borderRadius: "50%",
+    borderRadius: 19,
     backgroundColor: "#7799b5",
   },
   chatContentWrapper: {
